@@ -9,6 +9,7 @@ import incomeRoutes from './routes/income.routes';
 import categoriesRoutes from './routes/categories.routes';
 import analyticsRoutes from './routes/analytics.routes';
 import groupsRoutes from './routes/groups.routes';
+import aiRoutes from './routes/ai.routes';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/income-sources', incomeRoutes);
 app.use('/api/income-categories', categoriesRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/groups', groupsRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

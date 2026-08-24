@@ -1,30 +1,47 @@
 import { useState } from 'react';
-import { Sparkles, Send, Bot, User } from 'lucide-react';
+import { Sparkles, Send, Bot, User, Loader2 } from 'lucide-react';
+import { api } from '@/shared/services/api';
 
 export default function AIAssistantScreen() {
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [chat, setChat] = useState([
-    { id: 1, sender: 'ai', text: 'Hello! I am your AI financial assistant. How can I help you analyze your spending today?' },
-    { id: 2, sender: 'user', text: 'How much did I spend on food this month?' },
-    { id: 3, sender: 'ai', text: 'You spent $450 on food this month. This is 15% lower than last month. Great job keeping your dining out expenses low!' }
+    { id: 1, sender: 'ai', text: 'Hello! I am your AI financial assistant. How can I help you analyze your spending today?' }
   ]);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
+  const handleSend = async () => {
+    if (!message.trim() || isLoading) return;
     
     // Add user message
-    const newChat = [...chat, { id: Date.now(), sender: 'user', text: message }];
+    const userText = message;
+    const newChat = [...chat, { id: Date.now(), sender: 'user', text: userText }];
     setChat(newChat);
     setMessage('');
+    setIsLoading(true);
     
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Map chat history to API format
+      const messages = newChat.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        text: msg.text
+      }));
+
+      const res = await api.post<{ response: string }>('/ai/chat', { messages });
+      
       setChat(prev => [...prev, { 
         id: Date.now() + 1, 
         sender: 'ai', 
-        text: 'I am analyzing your request. Since I am a demo, I cannot connect to a real AI model yet, but I would show you insights here!' 
+        text: res.response
       }]);
-    }, 1000);
+    } catch (error: any) {
+      setChat(prev => [...prev, { 
+        id: Date.now() + 1, 
+        sender: 'ai', 
+        text: 'Sorry, I encountered an error connecting to the AI. Ensure your API key is set.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,6 +81,16 @@ export default function AIAssistantScreen() {
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--primary-light)', color: 'var(--primary)' }}>
+                <Bot size={16} />
+              </div>
+              <div style={{ padding: '0.75rem 1rem', borderRadius: '1rem', borderTopLeftRadius: 0, backgroundColor: 'var(--secondary)', color: 'var(--foreground)' }}>
+                <Loader2 size={16} className="animate-spin" />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input Area */}

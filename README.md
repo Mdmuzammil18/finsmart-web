@@ -44,9 +44,11 @@ Ensure you have Node.js (v18+) and npm installed on your machine.
 You will need to run both the backend API and the frontend development server.
 
 **1. Start the Backend:**
+Navigate to the backend directory, add your Gemini API Key, and start the server:
 ```bash
 cd backend
 npm install
+# Edit the .env file and set GEMINI_API_KEY="your-api-key"
 npm run dev
 ```
 
